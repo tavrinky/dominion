@@ -209,7 +209,6 @@ class Market(Action):
 class Chapel(Action):
 
 	def __init__(self):
-
 		super().__init__(2)
 
 	def __str__(self):
@@ -219,25 +218,20 @@ class Chapel(Action):
 		for card in p.chapelToTrash():
 			p.trash(g, card)
 
-
 class Cellar(Action):
 
 	def __init__(self):
-
-
-		super().__init__(2, action)
-
+		super().__init__(2)
 
 	def __str__(self):
-
 		return "Cellar"
 
-
 	def action(self, g, p):
+		# need to know the length for later
 		cards = p.cellarToDiscard()
+
 		for card in cards:
 			p.discardCard(card)
-
 		p.drawN(len(cards))
 
 		g.actions += 1 
@@ -245,58 +239,49 @@ class Cellar(Action):
 class Chancellor(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(3, action)
+		super().__init__(3)
 
 	def __str__(self):
 		return "Chancellor"
 
-	def action(self, Tg, p):
+	def action(self, g, p):
 		if p.chancellorDiscard():
+			# could make a seperate player method for this
+			# but a p.DeckToDiscard seems unnecessary
+			# and p.XToY is too general	
+
 			p.discard.extend(p.deck)
 			p.deck = []
 
 		g.cash += 2
 
-
 class Feast(Action):
 
 	def __init__(self):
-
-
-
-		super().__init__(4, action)
-
+		super().__init__(4)
 
 	def __str__(self):
-
 		return "Feast"
 
-
 	def action(self, g, p):
+		# card is non-null because Feast is not optional
+		# after the action is played
 		card = p.feastToGain()
 		if card.cost <= 5:
 			g.gain(p, card)
 			p.trash(Feast())
 
-
-
 class Moneylender(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(4, action)
-
+		super().__init__(4)
 
 	def __str__(self):
 		return "Moneylender"
 
 	def action(self, g, p):
-		if p.moneylenderWillTrash() and Copper() in p.hand:
+		# non optional
+		if Copper in p.hand:
 			p.trash(Copper())
 			g.cash += 3
 

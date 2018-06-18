@@ -137,10 +137,6 @@ class BMPlayer(Player):
 
 		return Duchy()
 
-	def moneylenderWillTrash(self):
-
-		return Copper() in self.hand
-
 	def remodelToTrash(self):
 		if hand:
 			cheapest = self.hand[0]

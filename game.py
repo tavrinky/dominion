@@ -17,6 +17,9 @@ class Game(object):
 		for card in [Copper(), Silver(), Gold(), Estate(), Duchy(), Province(), Smithy()]:
 			self.piles.append(self.howManySetup(card) * [card])
 
+
+		#tempted to make a more full fledged logger
+		#should be able to reconstruct the game from the log
 		self.log = [] 
 		self.trash = []
 		self.inPlay = []
@@ -135,7 +138,7 @@ class Game(object):
 			vp = 0
 			for card in self.players[i].cards():
 				if isinstance(card, Victory):
-					vp += card.vp 
+					vp += card.vp(self)
 
 			string += str(vp)
 

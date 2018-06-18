@@ -1,14 +1,28 @@
 
 
 
-
 class Card:
 
 	def __init__(self, cost):
 		self.cost = cost
 
+
+	# permits nonsense like Copper() == Copper()
+	# as opposed to having to do isinstance(Copper(), type(Copper()))
+
+	# common use case:
+
+	# for pile in piles:
+	#		if pile and pile[0] == card:
+	#			p.gain(pile.pop(0))
+
+	# as opposed to 
+	# if pile and isinstance(pile[0], type(card))
+
+
 	def __eq__(self, value):
 		return str(self) == str(value)
+
 
 class Cash(Card):
 
@@ -46,12 +60,16 @@ class Victory(Card):
 
 	def __init__(self, cost, vp):
 		super().__init__(cost)
+
+		#vp is a function of the gamestate (because Garden)
+		#could move VP outside because duck typing?
+
 		self.vp = vp
 
 class Estate(Victory):
 
 	def __init__(self):
-		super().__init__(2, 1)
+		super().__init__(2, lambda g: 1)
 
 	def __str__(self):
 		return "Estate"
@@ -60,7 +78,7 @@ class Estate(Victory):
 class Duchy(Victory):
 
 	def __init__(self):
-		super().__init__(5, 3)
+		super().__init__(5, lambda g: 3)
 
 	def __str__(self):
 		return "Duchy"
@@ -69,7 +87,7 @@ class Duchy(Victory):
 class Province(Victory):
 
 	def __init__(self):
-		super().__init__(8, 6)
+		super().__init__(8, lambda g: 	6)
 
 
 	def __str__(self):
@@ -79,7 +97,7 @@ class Province(Victory):
 class Curse(Victory):
 
 	def __init__(self):
-		super().__init__(0, -1)
+		super().__init__(0, lambda: -1)
 
 	def __str__(self):
 		return "Curse"
@@ -237,41 +255,38 @@ class Cellar(Action):
 		return "Cellar"
 
 
-	def action(g, p):
-			cards = p.cellarToDiscard()
+	def action(self, g, p):
+		cards = p.cellarToDiscard()
+		for card in cards:
+			p.discardCard(card)
 
-			for card in cards:
-				p.discardCard(card)
+		p.drawN(len(cards))
 
-			p.drawN(len(cards))
+		g.actions += 1 
 
-			g.actions += 1 
 class Chancellor(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-			if p.chancellorDiscard():
-				p.discard.extend(p.deck)
-				p.deck = []
-
-			g.cash += 2
+		
 
 		super().__init__(3, action)
 
 	def __str__(self):
 		return "Chancellor"
 
+	def action(self, Tg, p):
+		if p.chancellorDiscard():
+			p.discard.extend(p.deck)
+			p.deck = []
+
+		g.cash += 2
+
 
 class Feast(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-			card = p.feastToGain()
-			if card.cost <= 5:
-				g.gain(p, card)
-				p.trash(Feast())
 
 
 		super().__init__(4, action)
@@ -282,15 +297,19 @@ class Feast(Action):
 		return "Feast"
 
 
+	def action(self, g, p):
+		card = p.feastToGain()
+		if card.cost <= 5:
+			g.gain(p, card)
+			p.trash(Feast())
+
+
 
 class Moneylender(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-			if p.moneylenderWillTrash() and Copper() in p.hand:
-				p.trash(Copper())
-				g.cash += 3
+		
 
 		super().__init__(4, action)
 
@@ -298,23 +317,18 @@ class Moneylender(Action):
 	def __str__(self):
 		return "Moneylender"
 
+	def action(self, g, p):
+		if p.moneylenderWillTrash() and Copper() in p.hand:
+			p.trash(Copper())
+			g.cash += 3
+
 
 
 class Remodel(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-
-			card1 = p.remodelToTrash()
-
-			if p.hand:
-				#if not p.hand then no go
-				card2 = p.remodelToGain(card1.cost + 2)
-
-				if card2.cost <= card1.cost + 2:
-					p.trash(card1)
-					g.gain(p, card2)
+		
 
 
 
@@ -325,43 +339,43 @@ class Remodel(Action):
 	def __str__(self):
 		return "Remodel"
 
+	def action(self, g, p):
+
+		card1 = p.remodelToTrash()
+
+		if p.hand:
+			#if not p.hand then no go
+			card2 = p.remodelToGain(card1.cost + 2)
+
+			if card2.cost <= card1.cost + 2:
+				p.trash(card1)
+				g.gain(p, card2)
+
 
 
 class ThroneRoom(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-			card = p.throneRoomCard(g)
 
-			if card and card in p.hand:
-				p.inPlay(g, card)
-				card.action(g, p)
-				card.action(g, p)
 		
 		super().__init__(5, action)
 
 	def __str__(self):
 		return "Throne Room"
 
+	def action(self, g, p):
+		card = p.throneRoomCard(g)
+		if card and card in p.hand:
+			p.inPlay(g, card)
+			card.action(g, p)
+	
 
+			card.action(g, p)
 class Library(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-
-			droppedAction = []
-
-			while len(p.hand) < 7:
-				
-				card = deck.pop(0)
-				if isinstance(card, Action) and p.librarySetAside(g, card):
-					droppedAction.append(card)
-				else:
-					p.hand.append(card)
-
-			p.discard.extend(droppedAction)
 
 
 		super().__init__(5, action)
@@ -372,24 +386,40 @@ class Library(Action):
 		return "Library"
 
 
+	def action(self, g, p):
+
+		droppedAction = []
+
+		while len(p.hand) < 7:
+				
+			card = deck.pop(0)
+			if isinstance(card, Action) and p.librarySetAside(g, card):
+				droppedAction.append(card)
+			else:
+				p.hand.append(card)
+		p.discard.extend(droppedAction)
+
+
 class Mine(Action):
 
 	def __init__(self):
 
-		def action(g, p):
 
-			trashCard = p.mineTrash(g)
-			if trashCard and isinstance(trashCard, Cash):
-				gainCard = p.mineGain(g, trashCard.cost + 3)
-
-				if gainCard and isinstance(gainCard, Cash) and gainCard.cost <= trashCard.cost + 3:
-
-					g.gain(p, gainCard)
 
 		super().__init__(5, action)
 
 	def __str__(self):
 		return "Mine"
+
+	def action(self, g, p):
+
+		trashCard = p.mineTrash(g)
+		if trashCard and isinstance(trashCard, Cash):
+			gainCard = p.mineGain(g, trashCard.cost + 3)
+
+			if gainCard and isinstance(gainCard, Cash) and gainCard.cost <= trashCard.cost + 3:
+
+				g.gain(p, gainCard)
 
 
 class Attack(Card):
@@ -402,13 +432,7 @@ class Witch(Action, Attack):
 
 	def __init__(self):
 
-		def action(g, p):
 
-			p.drawN(2)
-
-			for player in g.players:
-				if player != p:
-					g.gain(player, Curse())
 
 		super().__init__(5, action)
 
@@ -417,36 +441,42 @@ class Witch(Action, Attack):
 		return "Witch"
 
 
+	def action(self, g, p):
+
+		p.drawN(2)
+
+		for player in g.players:
+			if player != p:
+				g.gain(player, Curse())
+
 class Adventurer(Action):
 
 	def __init__(self):
 
-		def action(g, p):
-
-			revealedNonCash = []
-			cashRevealed = 0
-
-			while cashRevealed < 2:
-				revealCard = p.deck.pop(0)
-
-				g.reveal(revealCard)
-
-				if isinstance(revealCard, Cash):
-					p.hand.append(revealCard)
-					cashRevealed += 1
-
-				else:
-					revealedNonCash.append(revealCard)
-
-			p.discard.extend(revealedNonCash)
-
+		
 		super().__init__(6, action)
 
 	def __str__(self):
 		"Adventurer"
 
 
-class 	
+	def action(self, g, p):
+
+		revealedNonCash = []
+		cashRevealed = 0
+
+		while cashRevealed < 2:
+			revealCard = p.deck.pop(0)
+
+			g.reveal(revealCard)
+
+			if isinstance(revealCard, Cash):
+				p.hand.append(revealCard)
+				cashRevealed += 1
+			else:
+				revealedNonCash.append(revealCard)
+
+		p.discard.extend(revealedNonCash)
 
 
 

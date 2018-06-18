@@ -24,12 +24,13 @@ class Card:
 		return str(self) == str(value)
 
 
+# metaprogramming this seems easy but low EV
+
 class Cash(Card):
 
 	def __init__(self, cost, cash):
 		super().__init__(cost)
 		self.cash = cash 
-
 
 class Copper(Cash):
 
@@ -74,7 +75,6 @@ class Estate(Victory):
 	def __str__(self):
 		return "Estate"
 
-
 class Duchy(Victory):
 
 	def __init__(self):
@@ -82,7 +82,6 @@ class Duchy(Victory):
 
 	def __str__(self):
 		return "Duchy"
-
 
 class Province(Victory):
 
@@ -92,7 +91,6 @@ class Province(Victory):
 
 	def __str__(self):
 		return "Province"
-
 
 class Curse(Victory):
 
@@ -105,19 +103,25 @@ class Curse(Victory):
 class Action(Card):
 
 	def __init__(self, cost):
+
+		# originally was self.action = action
+		# but instead now relying on duck typing
+		# because multiple inheritance is a fuck
+
 		super().__init__(cost)
 
+# could DSL the simple actions
+# ie village.action = "+2 actions +1 draw"
+# that sounds like fun but not incredibly useful
+# except for code clutter
 
 class Smithy(Action):
 
 	def __init__(self):
-
 		super().__init__(4)
-
 
 	def __str__(self):
 		return "Smithy"
-
 
 	def action(self, g, p):
 			p.drawN(3)
@@ -125,10 +129,7 @@ class Smithy(Action):
 class Village(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(3, action)
+		super().__init__(3)
 
 	def __str__(self):
 		return "Village"
@@ -137,14 +138,10 @@ class Village(Action):
 			g.actions += 2
 			p.draw()
 
-
 class Woodcutter(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(3, action)
+		super().__init__(3)
 
 	def __str__(self):
 		return "Woodcutter"
@@ -153,14 +150,10 @@ class Woodcutter(Action):
 			g.buys += 1 
 			g.cash += 2
 
-
 class CouncilRoom(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(4, action)
+		super().__init__(4)
 
 	def __str__(self):
 		return "Council Room"
@@ -169,22 +162,17 @@ class CouncilRoom(Action):
 			g.buys += 1 
 			p.drawN(3)
 
+			# gets around "every other player" by reading it 
+			# as "+3 cards, every player draws 1"
 			for player in g.players:
 				player.draw()
-
 
 class Festival(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(5, action)
-
-
+		super().__init__(5)
 
 	def __str__(self):
-
 		return "Festival"
 
 	def action(self, g, p):
@@ -192,16 +180,10 @@ class Festival(Action):
 			g.buys += 1 
 			g.cash += 2
 
-
-
 class Laboratory(Action):
 
 	def __init__(self):
-
-		
-
-		super().__init__(5, action)
-
+		super().__init__(5)
 
 	def __str__(self):
 		return "Laboratory"
@@ -213,10 +195,7 @@ class Laboratory(Action):
 class Market(Action):
 
 	def __init__(self):
-
-
-
-		super().__init__(5, action)
+		super().__init__(5)
 
 	def __str__(self):
 		return "Market"
@@ -227,19 +206,18 @@ class Market(Action):
 		g.buys += 1
 		g.cash += 1
 
-
 class Chapel(Action):
 
 	def __init__(self):
 
-		super().__init__(2, action)
+		super().__init__(2)
 
 	def __str__(self):
 		return "Chapel"
 
 	def action(self, g, p):
-			for card in p.chapelToTrash():
-				p.trash(card)
+		for card in p.chapelToTrash():
+			p.trash(g, card)
 
 
 class Cellar(Action):

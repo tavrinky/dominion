@@ -285,43 +285,29 @@ class Moneylender(Action):
 			p.trash(Copper())
 			g.cash += 3
 
-
-
 class Remodel(Action):
-
 	def __init__(self):
-
-		
-
-
-
-
-		super().__init__(4, action)
-
+		super().__init__(4)
 
 	def __str__(self):
 		return "Remodel"
 
 	def action(self, g, p):
-
+		# nullity of card1 is nullity of p.hand because not optional 
 		card1 = p.remodelToTrash()
-
 		if p.hand:
 			#if not p.hand then no go
 			card2 = p.remodelToGain(card1.cost + 2)
 
+			# verifying that player didn't fuck up
+			# should add in an error here? or extend verification?
 			if card2.cost <= card1.cost + 2:
-				p.trash(card1)
+				p.trash(g, card1)
 				g.gain(p, card2)
-
-
 
 class ThroneRoom(Action):
 
 	def __init__(self):
-
-
-		
 		super().__init__(5, action)
 
 	def __str__(self):

@@ -1,3 +1,7 @@
+
+# TODO: Extend logging, verification
+
+
 from players import *
 from utils import *
 from cards import *

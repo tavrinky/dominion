@@ -5,6 +5,7 @@
 from players import *
 from utils import *
 from cards import *
+from logger import *
 
 class Game(object):
 
@@ -24,22 +25,22 @@ class Game(object):
 
 		#tempted to make a more full fledged logger
 		#should be able to reconstruct the game from the log
-		self.log = [] 
+		self.log = Logger()
 		self.trash = []
 		self.inPlay = []
 
 	def buy(self, p, card):
 
 
-		self.log.append("\n\n" + self.playerName() + " attempted to buy a " + str(card))
-		self.log.append("\nCurrent cash is " + str(self.cash))
-		self.log.append("\nCard cost is " + str(card.cost))
+		self.log.add("\n\n" + self.playerName() + " attempted to buy a " + str(card))
+		self.log.add("\nCurrent cash is " + str(self.cash))
+		self.log.add("\nCard cost is " + str(card.cost))
 
 		if self.isPile(card) and self.buys > 0 and card.cost <= self.cash:
 			self.gain(p, card)
 
 
-			self.log.append("\n" + self.playerName() + " successfully bought a " + str(card))
+			self.log.add("\n" + self.playerName() + " successfully bought a " + str(card))
 
 	def playTreasures(self, p, card):
 
@@ -63,11 +64,15 @@ class Game(object):
 
 
 	def stepTurn(self):
+		self.log.addMany("Beginning turn: ", self.turn, ": \n")
 		self.actions = 0
 		self.buys = 1
 		self.cash = 0
 
 		p = self.players[self.turn%len(self.players)]
+
+		self.log.addMany("It is ", p.name, "'s turn\n")
+
 		p.playActions(self)
 		p.playTreasures(self)
 		p.buy(self)
@@ -94,7 +99,7 @@ class Game(object):
 			self.play()
 
 		else:
-			self.log.append("\nTHE GAME HAS BEEN WON")
+			self.log.add("\nTHE GAME HAS BEEN WON")
 
 	def isWon(self):
 		existsProvincePile = False
@@ -149,7 +154,7 @@ class Game(object):
 			string += "\n"
 
 
-			self.log.append(string)
+			self.log.add(string)
 
 
 

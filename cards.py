@@ -308,14 +308,16 @@ class Remodel(Action):
 class ThroneRoom(Action):
 
 	def __init__(self):
-		super().__init__(5, action)
+		super().__init__(5)
 
 	def __str__(self):
 		return "Throne Room"
 
 	def action(self, g, p):
 		card = p.throneRoomCard(g)
-		if card and card in p.hand:
+
+		# if there exists an action in 
+		if list(filter(lambda x: isinstance(x, Action), p.hand)):
 			p.inPlay(g, card)
 			card.action(g, p)
 	

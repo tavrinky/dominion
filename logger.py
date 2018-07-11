@@ -12,6 +12,11 @@ class Logger(object):
 		self.log.extend(ts)
 
 	def __str__(self):
-		self.log.join("\n")
+		self.log.join("")
 
-	
+
+	def attemptBuy(p, card):
+		self.addMany(p.name, " is attempting to buy ", str(card), "\n")
+
+	def beginAction(p, card):
+		self.addMany(p.name, " is attempting to buy "

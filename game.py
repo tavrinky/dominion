@@ -52,6 +52,8 @@ class Game(object):
 
 	def playActions(self, p, card):
 
+		self.log.addMany(p.name, " is attempting to play", )
+
 		if self.actions > 0 and isinstance(card, Action) and card in p.hand:
 			p.inPlay(self, card)
 			self.actions -= 1 

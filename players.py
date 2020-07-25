@@ -23,12 +23,9 @@ class Player(object):
 		
 		self.deck.extend(Estate() for i in range(3))
 
-
 		# otherwise always a 5-2 split
 		shuffle(self.deck)
 		self.drawN(5)
-
-
 
 	def draw(self):
 
@@ -36,14 +33,12 @@ class Player(object):
 		# if there is no discard and there is no deck, no change in state
 
 		if not self.deck:
-
 			self.deck = self.discard[:]
 			self.discard = []
 			shuffle(self.deck)
 
 		if self.deck:
 			self.hand.append(self.deck.pop(0))
-
 
 	def drawN(self, n):
 		if n <= 0:
@@ -72,11 +67,8 @@ class Player(object):
 		# why is filter lazy
 		# when everything else is strict
 		treasures = list(filter(lambda card: isinstance(card, Cash), self.hand))
-
-
 		for treasure in treasures:
-			g.playTreasures(self, treasure)
-
+			g.verifyPlayTreasures(self, treasure)
 
 	def __str__(self):
 		string = ""
@@ -128,24 +120,13 @@ class BMPlayer(Player):
 		super().__init__()
 
 	def buy(self, g):
-
 		d = [(8, Province()), (6, Gold()), (3, Silver())]
-
 		for cost, card in d:
-
 			if cost <= g.cash:
-			
-
-				g.buy(self, card)
+				g.verifyBuy(self, card)
 				
-
-
 	def playActions(self, g):
 		pass
-
-
-	
-
 
 	def chapelToTrash(self):
 		return self.allThe([Estate(), Curse()])
@@ -163,7 +144,7 @@ class BMPlayer(Player):
 		return Duchy()
 
 	def remodelToTrash(self):
-		if hand:
+		if self.hand:
 			cheapest = self.hand[0]
 
 			for card in self.hand:
@@ -193,24 +174,17 @@ class BMPlayer(Player):
 
 
 class BMSmithyPlayer(BMPlayer):
-
 	def __init__(self):
 		super().__init__()
 
-
 	def buy(self, g):
-
 		smithycount = len(list(filter(lambda n: n == Smithy(), self.cards())))
-
 		d = [(8, Province()), (6, Gold()), (4, Smithy()), (3, Silver())]
-
 		for cost, card in d:
 			if card != Smithy() or smithycount < 1:
 				if cost <= g.cash:
-			 
-					g.buy(self, card)
+					g.verifyBuy(self, card)
 
 	def playActions(self, g):
-
 		if g.actions and Smithy() in self.hand:
-			g.playActions(self, Smithy())
+			g.verifyPlayActions(self, Smithy())

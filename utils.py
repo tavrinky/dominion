@@ -1,15 +1,12 @@
 
+from pwd import getpwuid
 from collections import Counter
 
-
-
 def count(l):
-
     return Counter(map(str, l))
 
 
 def pilestr(pName, pile):
-
     string = ""
     string += pName
     string += "\n"
@@ -28,6 +25,8 @@ def flatten(ls):
     val = []
     for l in ls:
         val.extend(l)
-
     return val
+
+def get_username():
+    return getpwuid( os.getuid() )[ 0 ]
 

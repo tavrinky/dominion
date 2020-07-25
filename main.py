@@ -6,5 +6,6 @@ def main():
     game = Game([BMPlayer(), BMSmithyPlayer()]) 
     game.play() 
     print(game) 
+    return game 
 
 main()    

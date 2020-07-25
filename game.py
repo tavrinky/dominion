@@ -35,6 +35,7 @@ class Game(object):
 
         if self.isPile(card) and self.buys > 0 and card.cost <= self.cash:
             self.gain(p, card)
+            self.cash -= card.cost
             self.log.add("\n" + self.playerName() + " successfully bought a " + str(card))
 
     def verifyPlayTreasures(self, p, card):
@@ -51,7 +52,7 @@ class Game(object):
             card.action(self, p)
 
     def stepTurn(self):
-        self.log.addMany("Beginning turn: ", self.turn, ": \n")
+        self.log.addMany("\n Beginning turn: ", self.turn, ": \n")
         self.actions = 0
         self.buys = 1
         self.cash = 0
